@@ -1,0 +1,2 @@
+-I/home/c1/=/SecuritySuite/include
+-Wno-incompatible-pointer-types
