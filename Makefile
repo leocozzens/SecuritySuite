@@ -1,6 +1,6 @@
 CC = gcc
 EXT = c
-CFLAGS = -g -Wall -Wno-incompatible-pointer-types
+CFLAGS = -g -Wall
 IFLAGS = -Iinclude
 LFLAGS =
 SRC = src
@@ -13,7 +13,7 @@ OBJS = $(patsubst $(SRC)/%.$(EXT), $(OBJ)/%.o, $(SRCS))
 BIN = $(BINDIR)/$(BINNAME)
 
 SUBMITNAME = $(PROJECT_NAME).zip
-zip = zip
+ZIP = zip
 
 all: create_dirs
 all: $(BIN)
@@ -44,4 +44,4 @@ new: all
 
 submit:
 	rm -f $(SUBMITNAME)
-	zip $(SUBMITNAME) $(BIN)
+	$(ZIP) $(SUBMITNAME) $(BIN)
