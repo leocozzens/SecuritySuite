@@ -1,6 +1,5 @@
 // C stdlib headers
 #include <stdbool.h>
-
 // POSIX headers
 #include <dlfcn.h>
 
