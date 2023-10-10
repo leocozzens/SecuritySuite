@@ -3,7 +3,6 @@
 // Local headers
 #include <index.h>
 #include <input.h>
-#include <loader.h>
 
 #define INPUT_SIZE			4096
 #define GROWTH_FACTOR		2
@@ -23,13 +22,16 @@ int main(void) {
 		fprintf(stderr, INIT_ERR, errVal);
 		return EXIT_FAILURE;
 	}
-	while(true) {
+
+	bool running = true;
+	while(running) {
 		printf(PS1);
 		input_get(readBuff, INPUT_SIZE, stdin);
 		if(index_attempt_load(readBuff, &errVal)) 
 			fprintf(stderr, MODULE_CREATE_ERR, errVal);
-		else 
+		else
 			printf("Loaded module - %s\n", readBuff);
 	}
+	index_cleanup();
 	return EXIT_SUCCESS;
 }

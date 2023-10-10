@@ -6,8 +6,7 @@
 #include <loader.h>
 
 #define MEM_ERR             "Unable to allocate additional memory"
-#define LOCATE_ERR          "Could not locate module"
-#define IS_NULL(_x, _y, _z) if((_x) == NULL) { (_y); return _z; }
+#define IS_NULL(_x, _y) if((_x) == NULL) { _y; }
 
 typedef struct {
 	ModuleInterface **list;
@@ -22,22 +21,30 @@ bool index_init(unsigned int listInitSize, unsigned int newGrowthFactor, const c
 	modData.listCapacity = listInitSize;
     modData.growthFactor = newGrowthFactor;
 	modData.list = malloc(sizeof(ModuleInterface*) * listInitSize);
-    IS_NULL(modData.list, *errVal = MEM_ERR, true)
+    IS_NULL(modData.list, *errVal = MEM_ERR; return true)
     return false;
 }
 
 bool index_attempt_load(const char *modName, const char **errVal) {
-	ModuleInterface *newMod = load_module(modName);
+	ModuleInterface *newMod = load_module(modName, errVal);
 
-	IS_NULL(newMod, *errVal = LOCATE_ERR, true)
+	IS_NULL(newMod, return true)
 	if((modData.listLen + 1) > modData.listCapacity) {
 		ModuleInterface **tmp = realloc(modData.list, sizeof(ModuleInterface*) * (modData.listCapacity * modData.growthFactor));
-		IS_NULL(tmp, *errVal = MEM_ERR, true)
+		IS_NULL(tmp, *errVal = MEM_ERR; return true)
 		else {
 			modData.list = tmp;
 			modData.listCapacity *= modData.growthFactor;
 			modData.listLen++;
 		}
 	}
+	newMod->mod_init();
     return false;
+}
+
+void index_cleanup(void) {
+    for(int i = 0; i < modData.listLen; i++) {
+        // Unload all modules
+    }
+    free(modData.list);
 }

@@ -17,7 +17,7 @@ typedef struct {
     char *objectTitle;
     void *objectHandle;
     bool (*mod_init)        (void);
-    bool (*modexec)         (int argc, char **argv);
+    bool (*mod_exec)        (int argc, char **argv);
     bool (*mod_status)      (void);
     char *(*mod_get_err)    (void);
     char *(*mod_get_ver)    (void);
@@ -25,6 +25,6 @@ typedef struct {
     void (*mod_set_output)  (FILE *newStream);
 } ModuleInterface;
 
-ModuleInterface *load_module(const char *modName);
+ModuleInterface *load_module(const char *modName, const char **errVal);
 
 #endif
