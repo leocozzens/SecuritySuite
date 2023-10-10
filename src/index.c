@@ -1,5 +1,6 @@
 // C stdlib headers
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 // Local headers
 #include <index.h>
@@ -10,14 +11,14 @@
 
 typedef struct {
 	ModuleInterface **list;
-	unsigned int listLen;
-	unsigned int listCapacity;
-    unsigned int growthFactor;
+	uint32_t listLen;
+	uint32_t listCapacity;
+    uint32_t growthFactor;
 } ModVals;
 
 static ModVals modData;
 
-bool index_init(unsigned int listInitSize, unsigned int newGrowthFactor, const char **errVal) {
+bool index_init(uint32_t listInitSize, uint32_t newGrowthFactor, const char **errVal) {
 	modData.listCapacity = listInitSize;
     modData.growthFactor = newGrowthFactor;
 	modData.list = malloc(sizeof(ModuleInterface*) * listInitSize);
@@ -43,7 +44,7 @@ bool index_attempt_load(const char *modName, const char **errVal) {
 }
 
 void index_cleanup(void) {
-    for(int i = 0; i < modData.listLen; i++) {
+    for(uint32_t i = 0; i < modData.listLen; i++) {
         // Unload all modules
     }
     free(modData.list);

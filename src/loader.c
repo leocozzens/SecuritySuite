@@ -5,7 +5,7 @@
 #include <stdbool.h>
 // POSIX headers
 #ifdef _WIN32
-
+#include <libloaderapi.h>
 #else
 #include <dlfcn.h>
 #endif
