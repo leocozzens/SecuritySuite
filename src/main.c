@@ -1,24 +1,35 @@
 // C stdlib headers
 #include <stdio.h>
-#include <stdbool.h>
 // Local headers
+#include <index.h>
 #include <input.h>
 #include <loader.h>
 
-#define INPUT_SIZE 256
-#define PS1		   ">> "
+#define INPUT_SIZE			4096
+#define GROWTH_FACTOR		2
+#define LIST_INIT_SIZE		1
+#define EXIT_SUCCESS		0
+#define EXIT_FAILURE 		1
 
-static void attempt_load(const char *modName) {
-	if(load_module(modName)) printf("Could not locate module - %s\n", modName);
-	else printf("Loaded module - %s", modName);
-}
+#define PS1					">> "
+#define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
+#define MODULE_CREATE_ERR	"ERROR: Module creation failed\n%s\n"
+
+static const char *errVal;
+static char readBuff[INPUT_SIZE];
 
 int main(void) {
-	char buffer[INPUT_SIZE];
+	if(index_init(LIST_INIT_SIZE, GROWTH_FACTOR, &errVal)) {
+		fprintf(stderr, INIT_ERR, errVal);
+		return EXIT_FAILURE;
+	}
 	while(true) {
 		printf(PS1);
-		input_get(buffer, INPUT_SIZE, stdin);
-		attempt_load(buffer);
+		input_get(readBuff, INPUT_SIZE, stdin);
+		if(index_attempt_load(readBuff, &errVal)) 
+			fprintf(stderr, MODULE_CREATE_ERR, errVal);
+		else 
+			printf("Loaded module - %s\n", readBuff);
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }

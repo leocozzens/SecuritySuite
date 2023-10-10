@@ -14,6 +14,7 @@
 typedef struct _IO_FILE     FILE;
 
 typedef struct {
+    char *objectTitle;
     void *objectHandle;
     bool (*mod_init)        (void);
     bool (*modexec)         (int argc, char **argv);
@@ -24,6 +25,6 @@ typedef struct {
     void (*mod_set_output)  (FILE *newStream);
 } ModuleInterface;
 
-bool load_module(const char *modName);
+ModuleInterface *load_module(const char *modName);
 
 #endif
