@@ -1,8 +1,10 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-typedef struct _IO_FILE FILE;
+#include <stdint.h>
 
-void input_get(char *buffer, int buffSize, FILE *inStream);
+typedef FILE FILE_DEF;
+
+void input_get(char *buffer, uint32_t buffSize, FILE *inStream);
 
 #endif

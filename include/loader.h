@@ -11,7 +11,7 @@
 #define MOD_CLEANUP         "mod_cleanup"
 #define MOD_SET_OUTPUT      "mod_set_output"
 
-typedef struct _IO_FILE     FILE;
+typedef FILE                FILE_DEF;
 
 typedef struct {
     char *objectTitle;
@@ -22,7 +22,7 @@ typedef struct {
     char *(*mod_get_err)    (void);
     char *(*mod_get_ver)    (void);
     void (*mod_cleanup)     (void);
-    void (*mod_set_output)  (FILE *newStream);
+    void (*mod_set_output)  (FILE_DEF *newStream);
 } ModuleInterface;
 
 ModuleInterface *load_module(const char *modName, const char **errVal);
