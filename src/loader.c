@@ -26,13 +26,13 @@
 #define ERR_SIZE							256
 #define LIB_ERR								"Load Library failed to load - "
 
-#define LOAD_SYMBOL(_var, _handle, _symbol)	GetProcAddress((HMODULE) _handle, (LPCSTR) _symbol)
+#define LOAD_SYMBOL(_var, _handle, _symbol)	_var = GetProcAddress((HMODULE) _handle, (LPCSTR) _symbol)
 #define OPEN_LIB(_var, _libPath)			_var = (void*) LoadLibraryA(_libPath)
 #else
 #define EXTENSION							".so"
 
-#define LOAD_SYMBOL(_handle, _symbol)	dlsym((HMODULE) _handle, _symbol)
-#define OPEN_LIB(_var, _libPath)		_var = dlopen(_libPath, RTLD_LAZY)
+#define LOAD_SYMBOL(_var, _handle, _symbol)	_var = dlsym(_handle, _symbol)
+#define OPEN_LIB(_var, _libPath)			_var = dlopen(_libPath, RTLD_LAZY)
 #endif
 
 #define LOAD_FUNC(_interface, _var, _symbol, _errVal) \
