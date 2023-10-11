@@ -15,16 +15,16 @@
 // Local headers
 #include <loader.h>
 
+#define LIB_ERR					"Load Library failed to load - "
 #define MEM_ERR					"Unable to allocate additional memory"
 #define FUNC_NOT_FOUND			"Failed to load module symbol - "
 #define DEFAULT_MODULE_PATH		"./addons/"
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
 #define S_LEN(_string)			(sizeof(_string) - 1)
+#define ERR_SIZE				256
 
 #ifdef _WIN32
 #define EXTENSION							".dll"
-#define ERR_SIZE							256
-#define LIB_ERR								"Load Library failed to load - "
 
 #define LOAD_SYMBOL(_var, _handle, _symbol)	_var = (void*) GetProcAddress((HMODULE) _handle, (LPCSTR) _symbol)
 #define OPEN_LIB(_var, _libPath)			_var = (void*) LoadLibraryA(_libPath)
@@ -71,8 +71,20 @@ ModuleInterface *load_module(const char *modName, const char **errVal) {
 		return NULL;
 	}
 	#else
-	char *afterPath = strrchr(dlerror(), '/') + 1;
-	IS_NULL(newMod->objectHandle, *errVal = (afterPath == NULL) ? dlerror() : afterPath; free(newMod); return NULL)
+	
+	if(newMod->objectHandle == NULL) {
+		const char *error = dlerror();
+		free(newMod);
+		if(error == NULL) {
+			static char errorMessage[ERR_SIZE];
+			sprintf(errorMessage, "%s%s", LIB_ERR, modName);
+			*errVal = errorMessage;
+			return NULL;
+		}
+		char *afterPath = strrchr(error, '/');
+ 		*errVal = (afterPath == NULL) ? error : afterPath;
+		return NULL;
+	}
 	#endif
 
 	LOAD_FUNC(newMod, mod_init, MOD_INIT, errVal);

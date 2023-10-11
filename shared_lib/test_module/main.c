@@ -7,7 +7,7 @@
 bool mod_init(void) {
 	return false;
 }
-bool modexec(int argc, char **argv) {
+bool mod_exec(int argc, char **argv) {
 	return false;
 }
 bool mod_status(void) {
