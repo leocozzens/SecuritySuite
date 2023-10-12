@@ -1,15 +1,20 @@
 CC = gcc
 EXT = c
 CFLAGS = -g -Wall
-IFLAGS = -Iinclude
+INCLUDE = include
+IFLAGS = -I$(INCLUDE)
 LFLAGS =
 SRC = src
 OBJ = obj
 BINDIR = bin
+ADDONS = $(BINDIR)/addons
+SHARED_LIB = shared_lib
+SHARED_LIB_FLAGS = -I$(SHARED_LIB)/include -shared -fPIC
 PROJNAME = SecuritySuite
 BINNAME = $(PROJNAME).bin
 SRCS = $(wildcard $(SRC)/*.$(EXT))
 OBJS = $(patsubst $(SRC)/%.$(EXT), $(OBJ)/%.o, $(SRCS))
+SHARED_LIBS = $(filter-out $(SHARED_LIB)/$(INCLUDE), $(wildcard $(SHARED_LIB)/*))
 BIN = $(BINDIR)/$(BINNAME)
 
 SUBMITNAME = $(PROJECT_NAME).zip
@@ -17,9 +22,13 @@ ZIP = zip
 
 all: create_dirs
 all: $(BIN)
+all: $(SHARED_LIBS)
 
 release: CFLAGS = -O2
 release: new
+
+$(SHARED_LIB)/%: $(SHARED_LIB)/%/main.c
+	$(CC) $(SHARED_LIB_FLAGS) $(CFLAGS) $(wildcard $@/*.c) -o $(patsubst $(SHARED_LIB)/%, $(ADDONS)/%, $@).so
 
 $(BIN): $(OBJS)
 	$(CC) $(IFLAGS) $(CFLAGS) $(OBJS) -o $@ $(LFLAGS)
@@ -37,7 +46,7 @@ clean:
 	rm -r $(BINDIR) $(OBJ)
 
 create_dirs:
-	@mkdir -p $(BINDIR) $(OBJ)
+	mkdir -p $(BINDIR) $(ADDONS) $(OBJ)
 
 new: clean
 new: all

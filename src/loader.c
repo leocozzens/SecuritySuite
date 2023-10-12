@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stpcpy.h>
 #include <stdbool.h>
 // POSIX headers
 #ifdef _WIN32
@@ -15,22 +14,16 @@
 // Local headers
 #include <loader.h>
 
-#define LIB_ERR					"Load Library failed to load - "
-#define MEM_ERR					"Unable to allocate additional memory"
+#define LIB_ERR					"Failed to load module - "
 #define FUNC_NOT_FOUND			"Failed to load module symbol - "
-#define DEFAULT_MODULE_PATH		"./addons/"
+#define MEM_ERR					"Unable to allocate additional memory"
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
-#define S_LEN(_string)			(sizeof(_string) - 1)
 #define ERR_SIZE				256
 
 #ifdef _WIN32
-#define EXTENSION							".dll"
-
 #define LOAD_SYMBOL(_var, _handle, _symbol)	_var = (void*) GetProcAddress((HMODULE) _handle, (LPCSTR) _symbol)
 #define OPEN_LIB(_var, _libPath)			_var = (void*) LoadLibraryA(_libPath)
 #else
-#define EXTENSION							".so"
-
 #define LOAD_SYMBOL(_var, _handle, _symbol)	_var = dlsym(_handle, _symbol)
 #define OPEN_LIB(_var, _libPath)			_var = dlopen(_libPath, RTLD_LAZY)
 #endif
@@ -39,17 +32,11 @@
 LOAD_SYMBOL(_interface->_var, _interface->objectHandle, _symbol); \
 IS_NULL(_interface->_var, *_errVal = FUNC_NOT_FOUND _symbol; free(_interface); return NULL)
 
-ModuleInterface *load_module(const char *modName, const char **errVal) {
+ModuleInterface *load_module(const char *restrict modPath, const char **errVal) {
 	ModuleInterface *newMod = malloc(sizeof(ModuleInterface));
-
-	const char *modDir = DEFAULT_MODULE_PATH;
 	IS_NULL(newMod, *errVal = MEM_ERR; return NULL)
 
-	char *modPath = malloc(strlen(modDir) + strlen(modName) + S_LEN(EXTENSION) + 1);
-	local_stpcpy(local_stpcpy(local_stpcpy(modPath, DEFAULT_MODULE_PATH), modName), EXTENSION);
-
 	OPEN_LIB(newMod->objectHandle, modPath);
-	free(modPath);
 	#ifdef _WIN32
 	if(newMod->objectHandle == NULL) {
 		DWORD errorCode = GetLastError();
@@ -71,17 +58,17 @@ ModuleInterface *load_module(const char *modName, const char **errVal) {
 		return NULL;
 	}
 	#else
-	
 	if(newMod->objectHandle == NULL) {
 		const char *error = dlerror();
 		free(newMod);
 		if(error == NULL) {
 			static char errorMessage[ERR_SIZE];
-			sprintf(errorMessage, "%s%s", LIB_ERR, modName);
+			sprintf(errorMessage, "%s%s", LIB_ERR, modPath);
+			errorMessage[ERR_SIZE - 1] = '\0';
 			*errVal = errorMessage;
 			return NULL;
 		}
-		char *afterPath = strrchr(error, '/');
+		char *afterPath = strrchr(error, '/') + 1;
  		*errVal = (afterPath == NULL) ? error : afterPath;
 		return NULL;
 	}
@@ -90,6 +77,7 @@ ModuleInterface *load_module(const char *modName, const char **errVal) {
 	LOAD_FUNC(newMod, mod_init, MOD_INIT, errVal);
 	LOAD_FUNC(newMod, mod_exec, MOD_EXEC, errVal);
 	LOAD_FUNC(newMod, mod_status, MOD_STATUS, errVal);
+	LOAD_FUNC(newMod, mod_get_help, MOD_GET_HELP, errVal);
 	LOAD_FUNC(newMod, mod_get_err, MOD_GET_ERR, errVal);
 	LOAD_FUNC(newMod, mod_get_ver, MOD_GET_VER, errVal);
 	LOAD_FUNC(newMod, mod_cleanup, MOD_CLEANUP, errVal);

@@ -13,6 +13,11 @@ bool mod_exec(int argc, char **argv) {
 bool mod_status(void) {
 	return false;
 }
+
+char *mod_get_help(void) {
+	return NULL;
+}
+
 char *mod_get_err(void) {
 	return NULL;
 }
