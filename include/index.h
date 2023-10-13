@@ -1,10 +1,15 @@
 #ifndef INDEX_H
 #define INDEX_H
 
+#include <stdint.h>
 #include <stdbool.h>
 
-bool index_init(unsigned int listInitSize, unsigned int newGrowthFactor, const char **errVal);
-bool index_attempt_load(const char *modName, const char **errVal);
+typedef ModuleInterface _ModuleInterface;
+
+bool index_init(char **errVal);
+char *index_get_path(const char *modName);
+bool index_store_mod(_ModuleInterface *newMod, const char *modName, char **errVal);
+_ModuleInterface *index_remove_module(const char *modName);
 void index_cleanup(void);
 
 #endif

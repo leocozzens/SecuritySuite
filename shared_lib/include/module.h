@@ -1,7 +1,7 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-typedef FILE FILE_DEF;
+typedef FILE _FILE;
 
 bool mod_init(void); // Consider passing in the file directory for the module
 bool mod_exec(int argc, char **argv);
@@ -10,6 +10,6 @@ char *mod_get_help(void);
 char *mod_get_err(void);
 char *mod_get_ver(void);
 void mod_cleanup(void);
-void mod_set_output(FILE_DEF *newStream);
+void mod_set_output(_FILE *newStream);
 
 #endif

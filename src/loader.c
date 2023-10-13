@@ -13,10 +13,8 @@
 #endif
 // Local headers
 #include <loader.h>
+#include <errors.h>
 
-#define LIB_ERR					"Failed to load module - "
-#define FUNC_NOT_FOUND			"Failed to load module symbol - "
-#define MEM_ERR					"Unable to allocate additional memory"
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
 #define ERR_SIZE				256
 
@@ -32,7 +30,7 @@
 LOAD_SYMBOL(_interface->_var, _interface->objectHandle, _symbol); \
 IS_NULL(_interface->_var, *_errVal = FUNC_NOT_FOUND _symbol; free(_interface); return NULL)
 
-ModuleInterface *load_module(const char *restrict modPath, const char **errVal) {
+ModuleInterface *load_module(const char *restrict modPath, char **errVal) {
 	ModuleInterface *newMod = malloc(sizeof(ModuleInterface));
 	IS_NULL(newMod, *errVal = MEM_ERR; return NULL)
 
@@ -59,7 +57,7 @@ ModuleInterface *load_module(const char *restrict modPath, const char **errVal) 
 	}
 	#else
 	if(newMod->objectHandle == NULL) {
-		const char *error = dlerror();
+		char *error = dlerror();
 		free(newMod);
 		if(error == NULL) {
 			static char errorMessage[ERR_SIZE];
@@ -83,4 +81,11 @@ ModuleInterface *load_module(const char *restrict modPath, const char **errVal) 
 	LOAD_FUNC(newMod, mod_cleanup, MOD_CLEANUP, errVal);
 	LOAD_FUNC(newMod, mod_set_output, MOD_SET_OUTPUT, errVal);
 	return newMod;
+}
+
+bool unload_module(ModuleInterface *targetMod) {
+	if(targetMod == NULL) return true;
+	dlclose(targetMod->objectHandle);
+	free(targetMod);
+	return false;
 }

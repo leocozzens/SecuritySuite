@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-typedef FILE FILE_DEF;
+typedef FILE _FILE;
 
-void input_get(char *buffer, uint32_t buffSize, FILE *inStream);
+void input_get(char *buffer, uint32_t buffSize, _FILE *inStream);
 
 #endif

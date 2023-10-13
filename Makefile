@@ -10,6 +10,7 @@ BINDIR = bin
 ADDONS = $(BINDIR)/addons
 SHARED_LIB = shared_lib
 SHARED_LIB_FLAGS = -I$(SHARED_LIB)/include -shared -fPIC
+SHARED_LIB_EXT = so
 PROJNAME = SecuritySuite
 BINNAME = $(PROJNAME).bin
 SRCS = $(wildcard $(SRC)/*.$(EXT))
@@ -28,7 +29,7 @@ release: CFLAGS = -O2
 release: new
 
 $(SHARED_LIB)/%: $(SHARED_LIB)/%/main.c
-	$(CC) $(SHARED_LIB_FLAGS) $(CFLAGS) $(wildcard $@/*.c) -o $(patsubst $(SHARED_LIB)/%, $(ADDONS)/%, $@).so
+	$(CC) $(SHARED_LIB_FLAGS) $(CFLAGS) $(wildcard $@/*.c) -o $(patsubst $(SHARED_LIB)/%, $(ADDONS)/%, $@).$(SHARED_LIB_EXT)
 
 $(BIN): $(OBJS)
 	$(CC) $(IFLAGS) $(CFLAGS) $(OBJS) -o $@ $(LFLAGS)

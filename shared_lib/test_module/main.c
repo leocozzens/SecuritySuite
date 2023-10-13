@@ -5,9 +5,11 @@
 #include <module.h>
 
 bool mod_init(void) {
+	printf("Init successful\n");
 	return false;
 }
 bool mod_exec(int argc, char **argv) {
+	printf("Execution successful\n");
 	return false;
 }
 bool mod_status(void) {

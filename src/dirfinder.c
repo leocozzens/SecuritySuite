@@ -10,15 +10,16 @@
 #include <string.h>
 #include <errno.h>
 #endif
+// Local headers
+#include <errors.h>
 
-#define MEM_ERR					"Unable to allocate additional memory"
-#define PAGE_SIZE               4096
+#define PATH_MIN                256
 #define GROWTH_FACTOR           2
 #define S_LEN(_string)			(sizeof(_string) - 1)
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
 
 char *dir_get_exec(const char **errVal) {
-    size_t buffSize = PAGE_SIZE;
+    size_t buffSize = PATH_MIN;
     ssize_t retVal = 0;
     char *execPath = malloc(buffSize);
     bool sizeErr;

@@ -12,7 +12,7 @@
 #define MOD_CLEANUP         "mod_cleanup"
 #define MOD_SET_OUTPUT      "mod_set_output"
 
-typedef FILE                FILE_DEF;
+typedef FILE                _FILE;
 
 typedef struct {
     void *objectHandle;
@@ -23,9 +23,10 @@ typedef struct {
     char *(*mod_get_err)    (void);
     char *(*mod_get_ver)    (void);
     void (*mod_cleanup)     (void);
-    void (*mod_set_output)  (FILE_DEF *newStream);
+    void (*mod_set_output)  (_FILE *newStream);
 } ModuleInterface;
 
-ModuleInterface *load_module(const char *modPath, const char **errVal);
+ModuleInterface *load_module(const char *modPath, char **errVal);
+bool unload_module(ModuleInterface *targetMod);
 
 #endif
