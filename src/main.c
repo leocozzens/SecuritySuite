@@ -1,5 +1,6 @@
 // C stdlib headers
 #include <stdio.h>
+#include <stdlib.h>
 // Local headers
 #include <loader.h>
 #include <index.h>
@@ -11,7 +12,7 @@
 
 #define PS1					">> "
 #define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
-#define MODULE_CREATE_ERR	"ERROR: Module creation failed\n%s\n"
+#define MODULE_ERR			"ERROR: Module error\n%s\n"
 
 static char *errVal;
 static char readBuff[INPUT_SIZE];
@@ -23,13 +24,15 @@ int main(void) {
 	}
 
 	bool running = true;
+	int localArgc;
+	char **localArgv;
 	while(running) {
 		printf(PS1);
 		input_get(readBuff, INPUT_SIZE, stdin);
-		// if(index_attempt_load(readBuff, &errVal)) 
-		// 	fprintf(stderr, MODULE_CREATE_ERR, errVal);
-		// else
-		// 	printf("Loaded module - %s\n", readBuff);
+		localArgv = input_arglist(readBuff, &localArgc);
+		if(index_call_module(localArgc, localArgv, &errVal))
+			fprintf(stderr, MODULE_ERR, errVal);
+		free(localArgv);
 	}
 	index_cleanup();
 	return EXIT_SUCCESS;

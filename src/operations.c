@@ -18,7 +18,7 @@ bool LOAD(int argc, char **argv) {
 	char *modPath = index_get_path(argv[0]);
 	ModuleInterface *newMod = load_module(modPath, &errVal);
 	free(modPath);
-	IS_NULL(newMod, errVal = MEM_ERR; return true)
+	IS_NULL(newMod, return true)
     if(index_store_mod(newMod, argv[0], &errVal)) {
         free(newMod);
         return true;

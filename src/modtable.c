@@ -7,10 +7,20 @@
 #include <modtable.h>
 #include <errors.h>
 
+#define LIST_INIT_SIZE      8
+#define GROWTH_FACTOR       2
+#define FNV_PRIME           0x100000001b3
+#define FNV_OFFSET          0xcbf29ce48422325UL
+
 #define IS_NULL(_x, _y)     if((_x) == NULL) { _y; }
 
-#define FNV_PRIME 0x100000001b3
-#define FNV_OFFSET 0xcbf29ce48422325UL
+typedef struct {
+    char **list;
+    uint64_t length;
+    uint64_t capacity;
+} KeyList;
+
+static KeyList keyData;
 
 static uint64_t hash_fnv1a(const char *key) {
     uint64_t hashVal = FNV_OFFSET;
@@ -39,6 +49,11 @@ bool table_init(uint64_t tableSize, HashTable **table) {
         (*table)->set[i].key = NULL;
         (*table)->set[i].nextInst = NULL;
     }
+
+    keyData.length = 0;
+    keyData.capacity = LIST_INIT_SIZE;
+    keyData.list = malloc(keyData.capacity);
+    IS_NULL(keyData.list, free(*table); return true)
     return false;
 }
 
@@ -47,6 +62,15 @@ bool table_insert(HashTable *table, const char *key, ModuleInterface *interface,
         *errVal = NULL_ERR;
         return true;
     }
+
+    if(keyData.length >= keyData.capacity) {
+        char **tmp = realloc(keyData.list, keyData.capacity * GROWTH_FACTOR * sizeof(char*));
+        IS_NULL(tmp, *errVal = MEM_ERR; return true)
+        keyData.list = tmp;
+        keyData.capacity *= GROWTH_FACTOR;
+    }
+    keyData.list[keyData.length++] = strdup(key);
+
     uint64_t index = hash_fnv1a(key) % table->tableSize;
     Instance *activeInst;
     char *newKey = malloc(strlen(key) + 1);
@@ -89,12 +113,43 @@ Instance *table_get(HashTable *table, const char *key) {
 }
 
 ModuleInterface *table_delete(HashTable *table, const char *key) {
+    if(table == NULL || key == NULL) return NULL;
+    uint64_t index = hash_fnv1a(key) % table->tableSize;
 
-    return NULL;
+    if(table->set[index].key == NULL) return NULL;
+    uint64_t keySize = strlen(key);
+    Instance *prevInst = NULL;
+    Instance *tempInst = &table->set[index];
+    while(tempInst != NULL && !(strlen(tempInst->key) == keySize && strcmp(tempInst->key, key) == 0)) {
+        prevInst = tempInst;
+        tempInst = tempInst->nextInst;
+    }
+    if(tempInst == NULL) return NULL;
+
+    ModuleInterface *interface = tempInst->interface;
+    free(tempInst->key);
+    if(prevInst == NULL) {
+        if(tempInst->nextInst == NULL) {
+            tempInst->key = NULL;
+            tempInst->interface = NULL;
+            tempInst->nextInst = NULL;
+        }
+        else *tempInst = *tempInst->nextInst;
+    }
+    else {
+        prevInst->nextInst = tempInst->nextInst;
+        free(tempInst);
+    }
+    return interface;
 }
 
-void table_kill(HashTable **table) {
+void table_kill(HashTable **table, clear_inst termInter) {
+    for(int i = 0; i < keyData.length; i++) {
+        termInter(table_delete(*table, keyData.list[i]));
+        free(keyData.list[i]);
+    }
 
     free(*table);
+    free(keyData.list);
     *table = NULL;
 }

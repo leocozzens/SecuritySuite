@@ -22,6 +22,7 @@ char *dir_get_exec(const char **errVal) {
     size_t buffSize = PATH_MIN;
     ssize_t retVal = 0;
     char *execPath = malloc(buffSize);
+    IS_NULL(execPath, *errVal = MEM_ERR; return NULL)
     bool sizeErr;
     do {
         sizeErr = false;
@@ -36,6 +37,7 @@ char *dir_get_exec(const char **errVal) {
     } while(sizeErr);
     if(retVal == -1) {
         *errVal = strerror(errno);
+        free(execPath);
         return NULL;
     }
     char *lastSlash = strrchr(execPath, '/');
