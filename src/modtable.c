@@ -112,11 +112,11 @@ Instance *table_get(HashTable *table, const char *key) {
     return tempInst;
 }
 
-ModuleInterface *table_delete(HashTable *table, const char *key) {
-    if(table == NULL || key == NULL) return NULL;
+bool table_delete(HashTable *table, const char *key, ModuleInterface **retInterface) {
+    if(table == NULL || key == NULL) return true;
     uint64_t index = hash_fnv1a(key) % table->tableSize;
 
-    if(table->set[index].key == NULL) return NULL;
+    if(table->set[index].key == NULL) return true;
     uint64_t keySize = strlen(key);
     Instance *prevInst = NULL;
     Instance *tempInst = &table->set[index];
@@ -124,9 +124,9 @@ ModuleInterface *table_delete(HashTable *table, const char *key) {
         prevInst = tempInst;
         tempInst = tempInst->nextInst;
     }
-    if(tempInst == NULL) return NULL;
+    if(tempInst == NULL) return true;
 
-    ModuleInterface *interface = tempInst->interface;
+    if(retInterface != NULL) *retInterface = tempInst->interface;
     free(tempInst->key);
     if(prevInst == NULL) {
         if(tempInst->nextInst == NULL) {
@@ -140,12 +140,14 @@ ModuleInterface *table_delete(HashTable *table, const char *key) {
         prevInst->nextInst = tempInst->nextInst;
         free(tempInst);
     }
-    return interface;
+    return false;
 }
 
 void table_kill(HashTable **table, clear_inst termInter) {
     for(int i = 0; i < keyData.length; i++) {
-        termInter(table_delete(*table, keyData.list[i]));
+        ModuleInterface *tempInterface = NULL;
+        table_delete(*table, keyData.list[i], &tempInterface);
+        termInter(tempInterface);
         free(keyData.list[i]);
     }
 

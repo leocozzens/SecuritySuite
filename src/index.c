@@ -17,7 +17,7 @@
 #define IS_NULL(_x, _y) 		if((_x) == NULL) { _y; }
 #define S_LEN(_string)			(sizeof(_string) - 1)	// Compile-time string length evaluation for known literals
 #define STRINGIZE(_x)			#_x
-#define REMOVE_FUNCTION(_func)	table_delete(modTable, STRINGIZE(_func))
+#define REMOVE_FUNCTION(_func)	table_delete(modTable, STRINGIZE(_func), NULL)
 #define REMOVE_FUNCTIONS		REMOVE_FUNCTION(LOAD); REMOVE_FUNCTION(UNLOAD)
 #define INSERT_CMD(_cmd)		if(table_insert(modTable, STRINGIZE(_cmd), NULL, _cmd, get_op_err, errVal)) { \
 								free(modDir.path); *errVal = OP_ERR; REMOVE_FUNCTIONS; return true; }
@@ -50,6 +50,7 @@ bool index_init(char **errVal) {
 	}
 	INSERT_CMD(LOAD);
 	INSERT_CMD(UNLOAD);
+	INSERT_CMD(CLEAR);
 
     return false;
 }
@@ -60,18 +61,22 @@ char *index_get_path(const char *modName) {
 	return modPath;
 }
 
-bool index_call_module(int argc, char **argv, char **errVal) {
+bool index_call_module(int argc, char **argv, char **currMod, char **errVal) {
 	Instance *targetInst = table_get(modTable, argv[0]);
-	IS_NULL(targetInst, *errVal = NONE_ERR; return true)
-	if(targetInst->mainExec(argc - 1, argv + 1)) {
-		*errVal = targetInst->diagnostic();
+	IS_NULL(targetInst, *currMod = CALL_MODULE_ERR; *errVal = NONE_ERR; return true)
+	if(targetInst->mainExec(argc - 1, (argc > 1) ? argv + 1 : argv)) {
+		char *lastOp = (targetInst->interface == NULL) ? get_last_op() : targetInst->interface->mod_get_ver();
+		*currMod = (lastOp == NULL) ? "tool" : lastOp;
+
+		char *diagnostic = targetInst->diagnostic();
+		*errVal = (diagnostic == NULL) ? UNLISTED_ERR : diagnostic;
 		return true;
 	}
 	return false;
 }
 
-ModuleInterface *index_remove_module(const char *modName) {
-	return table_delete(modTable, modName);
+bool index_remove_module(const char *modName, ModuleInterface **retInterface) {
+	return table_delete(modTable, modName, retInterface);
 }
 
 bool index_store_mod(ModuleInterface *newMod, const char *modName, char **errVal) {

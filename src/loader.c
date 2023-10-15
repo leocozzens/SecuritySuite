@@ -83,10 +83,9 @@ ModuleInterface *load_module(const char *restrict modPath, char **errVal) {
 	return newMod;
 }
 
-bool unload_module(ModuleInterface *targetMod) {
-	if(targetMod == NULL) return true;
+void unload_module(ModuleInterface *targetMod) {
+	if(targetMod == NULL) return;
 	targetMod->mod_cleanup();
 	dlclose(targetMod->objectHandle);
 	free(targetMod);
-	return false;
 }

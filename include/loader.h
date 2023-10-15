@@ -27,6 +27,6 @@ typedef struct {
 } ModuleInterface;
 
 ModuleInterface *load_module(const char *modPath, char **errVal);
-bool unload_module(ModuleInterface *targetMod);
+void unload_module(ModuleInterface *targetMod);
 
 #endif

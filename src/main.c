@@ -12,9 +12,10 @@
 
 #define PS1					">> "
 #define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
-#define MODULE_ERR			"ERROR: Module error\n%s\n"
+#define MODULE_ERR			"ERROR: %s - %s\n"
 
 static char *errVal;
+static char *currMod;
 static char readBuff[INPUT_SIZE];
 
 int main(void) {
@@ -30,8 +31,8 @@ int main(void) {
 		printf(PS1);
 		input_get(readBuff, INPUT_SIZE, stdin);
 		localArgv = input_arglist(readBuff, &localArgc);
-		if(index_call_module(localArgc, localArgv, &errVal))
-			fprintf(stderr, MODULE_ERR, errVal);
+		if(index_call_module(localArgc, localArgv, &currMod, &errVal))
+			fprintf(stderr, MODULE_ERR, currMod, errVal);
 		free(localArgv);
 	}
 	index_cleanup();
