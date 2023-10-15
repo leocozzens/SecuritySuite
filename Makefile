@@ -1,6 +1,7 @@
 CC = gcc
 EXT = c
 CFLAGS = -g -Wall
+# CFLAGS = -g -Wall -fsanitize=address
 INCLUDE = include
 IFLAGS = -I$(INCLUDE)
 LFLAGS =

@@ -1,5 +1,6 @@
 // C stdlib headers
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -18,6 +19,12 @@
 #define S_LEN(_string)			(sizeof(_string) - 1)
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
 
+static char get_last_char(char *eval, uint64_t evalSize) {
+    uint64_t i;
+    for(i = 0; eval[i] != '\0' && i < evalSize - 1; i++);
+    return eval[i];
+}
+
 char *dir_get_exec(const char **errVal) {
     size_t buffSize = PATH_MIN;
     ssize_t retVal = 0;
@@ -27,7 +34,7 @@ char *dir_get_exec(const char **errVal) {
     do {
         sizeErr = false;
         retVal = readlink("/proc/self/exe", execPath, buffSize);
-        if(execPath[buffSize - 1] != '\0') {
+        if(get_last_char(execPath, buffSize) != '\0') {
             sizeErr = true;
             buffSize *= GROWTH_FACTOR;
             char *tmp = realloc(execPath, buffSize);
@@ -43,8 +50,9 @@ char *dir_get_exec(const char **errVal) {
     char *lastSlash = strrchr(execPath, '/');
     size_t dirSize = (lastSlash == NULL) ? strlen(execPath) : lastSlash - execPath;
     dirSize++;  // This will include the '/' in new string
-    char *execDir = malloc(dirSize + 1);
+    char *execDir = malloc(dirSize + 1); // + 1 to allow for the null terminator
     strncpy(execDir, execPath, dirSize);
+    execDir[dirSize] = '\0';
     free(execPath);
     return execDir;
 }

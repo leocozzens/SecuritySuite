@@ -11,6 +11,7 @@
 #define EXIT_FAILURE 		1
 
 #define PS1					">> "
+#define EXITING				"Exiting program...\n"
 #define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
 #define MODULE_ERR			"ERROR: %s - %s\n"
 
@@ -19,12 +20,12 @@ static char *currMod;
 static char readBuff[INPUT_SIZE];
 
 int main(void) {
-	if(index_init(&errVal)) {
+	bool running = true;
+	if(index_init(&errVal, &running)) {
 		fprintf(stderr, INIT_ERR, errVal);
 		return EXIT_FAILURE;
 	}
 
-	bool running = true;
 	int localArgc;
 	char **localArgv;
 	while(running) {
@@ -36,5 +37,6 @@ int main(void) {
 		free(localArgv);
 	}
 	index_cleanup();
+	printf(EXITING);
 	return EXIT_SUCCESS;
 }

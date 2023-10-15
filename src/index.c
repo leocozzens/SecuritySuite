@@ -18,7 +18,7 @@
 #define S_LEN(_string)			(sizeof(_string) - 1)	// Compile-time string length evaluation for known literals
 #define STRINGIZE(_x)			#_x
 #define REMOVE_FUNCTION(_func)	table_delete(modTable, STRINGIZE(_func), NULL)
-#define REMOVE_FUNCTIONS		REMOVE_FUNCTION(LOAD); REMOVE_FUNCTION(UNLOAD)
+#define REMOVE_FUNCTIONS		REMOVE_FUNCTION(LOAD); REMOVE_FUNCTION(UNLOAD); REMOVE_FUNCTION(CLEAR); REMOVE_FUNCTION(DONE)
 #define INSERT_CMD(_cmd)		if(table_insert(modTable, STRINGIZE(_cmd), NULL, _cmd, get_op_err, errVal)) { \
 								free(modDir.path); *errVal = OP_ERR; REMOVE_FUNCTIONS; return true; }
 
@@ -36,7 +36,8 @@ typedef struct {
 static ModDir modDir;
 static HashTable *modTable;
 
-bool index_init(char **errVal) {
+bool index_init(char **errVal, bool *running) {
+	set_run_var(running);
 	static char errStr[ERR_LEN];
 	const char *dirErr;
 	modDir.path = dir_get_exec(&dirErr);
@@ -51,6 +52,7 @@ bool index_init(char **errVal) {
 	INSERT_CMD(LOAD);
 	INSERT_CMD(UNLOAD);
 	INSERT_CMD(CLEAR);
+	INSERT_CMD(DONE);
 
     return false;
 }

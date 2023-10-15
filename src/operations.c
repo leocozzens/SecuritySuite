@@ -12,16 +12,19 @@
 #define LOAD_USAGE              " - USAGE: " STRINGIZE(LOAD) " [MODULE_NAME]"
 #define UNLOAD_USAGE            " - USAGE: " STRINGIZE(UNLOAD) " [MODULE_NAME]"
 #define CLEAR_USAGE             " - USAGE: " STRINGIZE(CLEAR)
+#define DONE_USAGE              " - USAGE: " STRINGIZE(DONE)
 
 #define CLEAR_CODE              "\e[1;1H\e[2J"
+#define RUNNING_CLEANUP         "Running cleanup...\n"
 
 #define IS_NULL(_x, _y) 		if((_x) == NULL) { _y; }
 #define RET_ERR(_count, _usage) if(argc != (_count)) { errVal = (argc < 1) ? FEW_ARG_ERR _usage : MANY_ARG_ERR _usage; return true; }
 
 static char *errVal = NULL;
 static char *lastOp = NULL;
+static bool *running = NULL;
 
-bool LOAD(int argc, char **argv) {
+BASE_OP(LOAD) {
     lastOp = STRINGIZE(LOAD);
     RET_ERR(1, LOAD_USAGE)
 	char *modPath = index_get_path(argv[0]);
@@ -36,7 +39,7 @@ bool LOAD(int argc, char **argv) {
     return false;
 }
 
-bool UNLOAD(int argc, char **argv) {
+BASE_OP(UNLOAD) {
     lastOp = STRINGIZE(UNLOAD);
     RET_ERR(1, UNLOAD_USAGE)
     ModuleInterface *targetInterface;
@@ -50,10 +53,18 @@ bool UNLOAD(int argc, char **argv) {
     return false;
 }
 
-bool CLEAR(int argc, char **argv) {
+BASE_OP(CLEAR) {
     lastOp = STRINGIZE(CLEAR);
     RET_ERR(0, CLEAR_USAGE)
     printf(CLEAR_CODE);
+    return false;
+}
+
+BASE_OP(DONE) {
+    lastOp = STRINGIZE(DONE);
+    RET_ERR(0, DONE_USAGE)
+    *running = false;
+    printf(RUNNING_CLEANUP);
     return false;
 }
 
@@ -63,4 +74,8 @@ char *get_op_err(void) {
 
 char *get_last_op(void) {
     return lastOp;
+}
+
+void set_run_var(bool *runVar) {
+    running = runVar;
 }

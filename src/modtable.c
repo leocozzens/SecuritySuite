@@ -44,7 +44,7 @@ bool table_init(uint64_t tableSize, HashTable **table) {
     *table = malloc(sizeof(HashTable) + sizeof(Instance) * tableSize);
     IS_NULL(*table, return true)
     (*table)->tableSize = tableSize;
-    (*table)->set = (Instance*) (*table) + 1;
+    (*table)->set = (Instance*) ((*table) + 1);
     for(uint64_t i = 0; i < tableSize; i++) {
         (*table)->set[i].key = NULL;
         (*table)->set[i].nextInst = NULL;
@@ -52,7 +52,7 @@ bool table_init(uint64_t tableSize, HashTable **table) {
 
     keyData.length = 0;
     keyData.capacity = LIST_INIT_SIZE;
-    keyData.list = malloc(keyData.capacity);
+    keyData.list = malloc(sizeof(char**) * keyData.capacity);
     IS_NULL(keyData.list, free(*table); return true)
     return false;
 }
@@ -69,7 +69,9 @@ bool table_insert(HashTable *table, const char *key, ModuleInterface *interface,
         keyData.list = tmp;
         keyData.capacity *= GROWTH_FACTOR;
     }
-    keyData.list[keyData.length++] = strdup(key);
+    keyData.list[keyData.length] = malloc(strlen(key) + 1);
+    IS_NULL(keyData.list[keyData.length], *errVal = MEM_ERR; return true)
+    strcpy(keyData.list[keyData.length++], key);
 
     uint64_t index = hash_fnv1a(key) % table->tableSize;
     Instance *activeInst;
@@ -144,7 +146,7 @@ bool table_delete(HashTable *table, const char *key, ModuleInterface **retInterf
 }
 
 void table_kill(HashTable **table, clear_inst termInter) {
-    for(int i = 0; i < keyData.length; i++) {
+    for(uint64_t i = 0; i < keyData.length; i++) {
         ModuleInterface *tempInterface = NULL;
         table_delete(*table, keyData.list[i], &tempInterface);
         termInter(tempInterface);
