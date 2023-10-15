@@ -32,14 +32,13 @@ static uint64_t hash_fnv1a(const char *key) {
 }
 
 static bool check_if_dup(Instance *checkInst, const void *key, size_t keySize) {
-    Instance *tempInst = checkInst;
-    while(tempInst != NULL) {
-        if(strlen(tempInst->key) == keySize && memcmp(checkInst->key, key, keySize) == 0) return true;
-        tempInst = tempInst->nextInst;
+    if(checkInst->key == NULL) return false;
+    while(checkInst != NULL) {
+        if(strlen(checkInst->key) == keySize && memcmp(checkInst->key, key, keySize) == 0) return true;
+        checkInst = checkInst->nextInst;
     }
     return false;
 }
-
 bool table_init(uint64_t tableSize, HashTable **table) {
     *table = malloc(sizeof(HashTable) + sizeof(Instance) * tableSize);
     IS_NULL(*table, return true)
@@ -136,7 +135,11 @@ bool table_delete(HashTable *table, const char *key, ModuleInterface **retInterf
             tempInst->interface = NULL;
             tempInst->nextInst = NULL;
         }
-        else *tempInst = *tempInst->nextInst;
+        else {
+            Instance *oldInst = tempInst->nextInst;
+            *tempInst = *oldInst;
+            free(oldInst);
+        }
     }
     else {
         prevInst->nextInst = tempInst->nextInst;
@@ -148,12 +151,15 @@ bool table_delete(HashTable *table, const char *key, ModuleInterface **retInterf
 void table_kill(HashTable **table, clear_inst termInter) {
     for(uint64_t i = 0; i < keyData.length; i++) {
         ModuleInterface *tempInterface = NULL;
-        table_delete(*table, keyData.list[i], &tempInterface);
-        termInter(tempInterface);
+        if(!table_delete(*table, keyData.list[i], &tempInterface)) {
+            printf("Removing - %s\n", keyData.list[i]);
+            termInter(tempInterface);
+        }
         free(keyData.list[i]);
     }
 
     free(*table);
     free(keyData.list);
     *table = NULL;
+    keyData.list = NULL;
 }
