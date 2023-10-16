@@ -12,6 +12,7 @@
 #define EXIT_FAILURE 		1
 
 #define PS1					">> "
+#define USAGE				"%s [OPTIONS]..."
 #define EXITING				"Cleanup finished\nExiting program...\n"
 #define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
 #define INPUT_ERR			"ERROR: Failed to receive user input\n%s\n"
@@ -23,7 +24,12 @@ static char *errVal;
 static char *currMod;
 static char *readBuff;
 
-int main(void) {
+int main(int argc, char **argv) {
+	// TODO: Handle command line arguments
+
+
+	// TODO: Take input from config file
+
 	bool running = true;
 	if(index_init(&errVal, &running) || input_init(INPUT_SIZE, INPUT_GROWTH_FACTOR, &errVal)) {
 		fprintf(stderr, INIT_ERR, errVal);

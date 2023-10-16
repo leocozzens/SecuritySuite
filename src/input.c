@@ -29,7 +29,7 @@ bool input_init(uint64_t buffInitSize, uint32_t growthFactor, char **errVal) {
 char *input_get(FILE *inStream, char **errVal) {
     uint64_t offSet = 0;
     uint64_t readSize = buffInfo.buffSize;
-    bool sizeErr = false;
+    bool sizeErr;
     char *newLine;
     do {
         IS_NULL(fgets(buffInfo.data + offSet, readSize, inStream), *errVal = INPUT_STREAM_ERR; DONE(0, NULL); return NULL)
@@ -75,9 +75,6 @@ char **input_arglist(char *buffer, int *argc) {
             argv[j++] = currentFirst;
             firstArg = true;
         }
-    }
-    for(int i = 0; i < *argc; i++) {
-        printf("i#%d - %s\n", i, argv[i]);
     }
     return argv;
 }
