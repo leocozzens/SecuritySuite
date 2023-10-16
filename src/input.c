@@ -4,21 +4,52 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+// Local headers
+#include <errors.h>
+#include <operations.h>
+#include <strchrnul.h>
 
 #define IS_NULL(_x, _y)     if((_x) == NULL) { _y; }
 
-// Static functions
-static void clear_stdin(void) {
-    int c;
-    do { c = fgetc(stdin); } while(c != '\n' || c != EOF);
+typedef struct {
+    char *data;
+    uint64_t buffSize;
+    uint32_t growthFactor;
+} BuffData;
+
+static BuffData buffInfo;
+bool input_init(uint64_t buffInitSize, uint32_t growthFactor, char **errVal) {
+    buffInfo.data = malloc(buffInitSize);
+    IS_NULL(buffInfo.data, *errVal = MEM_ERR; return true)
+    buffInfo.buffSize = buffInitSize;
+    buffInfo.growthFactor = growthFactor;
+    return false;
 }
 
-// Public functions
-void input_get(char *buffer, uint32_t buffSize, FILE *inStream) {
-    fgets(buffer, buffSize, inStream);
-    char *newLine = strrchr(buffer, '\n');
-    if(newLine == NULL) clear_stdin();
-    else *newLine = '\0';
+char *input_get(FILE *inStream, char **errVal) {
+    uint64_t offSet = 0;
+    uint64_t readSize = buffInfo.buffSize;
+    bool sizeErr = false;
+    char *newLine;
+    do {
+        IS_NULL(fgets(buffInfo.data + offSet, readSize, inStream), *errVal = INPUT_STREAM_ERR; DONE(0, NULL); return NULL)
+        newLine = local_strchrnul(buffInfo.data + offSet, '\n');
+        if(*newLine == '\0') {
+            offSet = newLine - buffInfo.data;
+            sizeErr = true;
+        }
+        else sizeErr = false;
+
+        if(sizeErr) {
+            char *tmp = realloc(buffInfo.data, buffInfo.buffSize * buffInfo.growthFactor);
+            IS_NULL(tmp, *errVal = INPUT_MEM_ERR;  return NULL)
+            buffInfo.data = tmp;
+            readSize = (buffInfo.buffSize * buffInfo.growthFactor) - buffInfo.buffSize;
+            buffInfo.buffSize *= buffInfo.growthFactor;
+        }
+    } while(sizeErr);
+    *newLine = '\0';
+    return buffInfo.data;
 }
 
 char **input_arglist(char *buffer, int *argc) {
@@ -44,6 +75,9 @@ char **input_arglist(char *buffer, int *argc) {
             argv[j++] = currentFirst;
             firstArg = true;
         }
+    }
+    for(int i = 0; i < *argc; i++) {
+        printf("i#%d - %s\n", i, argv[i]);
     }
     return argv;
 }

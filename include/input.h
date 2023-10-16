@@ -5,7 +5,8 @@
 
 typedef FILE _FILE;
 
-void input_get(char *buffer, uint32_t buffSize, _FILE *inStream);
+bool input_init(uint64_t buffInitSize, uint32_t growthFactor, char **errVal);
+char *input_get(_FILE *inStream, char **errVal);
 char **input_arglist(const char *buffer, int *argc);
 
 #endif

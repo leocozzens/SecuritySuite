@@ -22,6 +22,7 @@ typedef struct {
 
 static KeyList keyData;
 
+// Static functions
 static uint64_t hash_fnv1a(const char *key) {
     uint64_t hashVal = FNV_OFFSET;
     for(uint64_t i = 0; key[i] != '\0'; i++) {
@@ -39,6 +40,8 @@ static bool check_if_dup(Instance *checkInst, const void *key, size_t keySize) {
     }
     return false;
 }
+
+// Public functions
 bool table_init(uint64_t tableSize, HashTable **table) {
     *table = malloc(sizeof(HashTable) + sizeof(Instance) * tableSize);
     IS_NULL(*table, return true)

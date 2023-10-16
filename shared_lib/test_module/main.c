@@ -27,7 +27,6 @@ char *mod_get_ver(void) {
 	return NULL;
 }
 void mod_cleanup(void) {
-	printf("Cleanup successful\n");
 }
 void mod_set_output(FILE *newStream) {
 

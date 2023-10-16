@@ -19,12 +19,14 @@
 #define S_LEN(_string)			(sizeof(_string) - 1)
 #define IS_NULL(_x, _y)			if((_x) == NULL) { _y; }
 
+// Static functions
 static char get_last_char(char *eval, uint64_t evalSize) {
     uint64_t i;
     for(i = 0; eval[i] != '\0' && i < evalSize - 1; i++);
     return eval[i];
 }
 
+// Public functions
 char *dir_get_exec(const char **errVal) {
     size_t buffSize = PATH_MIN;
     ssize_t retVal = 0;
