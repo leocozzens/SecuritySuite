@@ -81,3 +81,8 @@ char **input_arglist(char *buffer, int *argc) {
     }
     return argv;
 }
+
+void input_cleanup(void) {
+    free(buffInfo.data);
+    buffInfo.buffSize = 0;
+}

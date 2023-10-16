@@ -42,6 +42,7 @@ int main(void) {
 		free(localArgv);
 	}
 	index_cleanup();
+	input_cleanup();
 	printf(EXITING);
 	return EXIT_SUCCESS;
 }
