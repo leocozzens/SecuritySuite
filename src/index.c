@@ -18,8 +18,8 @@
 #define S_LEN(_string)			(sizeof(_string) - 1)	// Compile-time string length evaluation for known literals
 #define STRINGIZE(_x)			#_x
 #define REMOVE_FUNCTION(_func)	table_delete(modTable, STRINGIZE(_func), NULL)
-#define REMOVE_FUNCTIONS		REMOVE_FUNCTION(LOAD); REMOVE_FUNCTION(UNLOAD); REMOVE_FUNCTION(CLEAR); REMOVE_FUNCTION(DONE)
-#define INSERT_CMD(_cmd)		if(table_insert(modTable, STRINGIZE(_cmd), NULL, _cmd, get_op_err, errVal)) { \
+#define REMOVE_FUNCTIONS		REMOVE_FUNCTION(LOAD); REMOVE_FUNCTION(UNLOAD); REMOVE_FUNCTION(HELP); REMOVE_FUNCTION(CLEAR); REMOVE_FUNCTION(DONE)
+#define INSERT_CMD(_cmd, _help) if(table_insert(modTable, STRINGIZE(_cmd), NULL, _cmd, get_op_err, _help, errVal)) { \
 								free(modDir.path); *errVal = OP_ERR; REMOVE_FUNCTIONS; return true; }
 
 #ifdef _WIN32
@@ -49,10 +49,11 @@ bool index_init(char **errVal, bool *running) {
 		*errVal = MEM_ERR;
 		return true;
 	}
-	INSERT_CMD(LOAD);
-	INSERT_CMD(UNLOAD);
-	INSERT_CMD(CLEAR);
-	INSERT_CMD(DONE);
+	INSERT_CMD(LOAD, LOAD_HELP);
+	INSERT_CMD(UNLOAD, UNLOAD_HELP);
+	INSERT_CMD(HELP, HELP_HELP);
+	INSERT_CMD(CLEAR, CLEAR_HELP);
+	INSERT_CMD(DONE, DONE_HELP);
 
     return false;
 }
@@ -66,9 +67,9 @@ char *index_get_path(const char *modName) {
 bool index_call_module(int argc, char **argv, char **currMod, char **errVal) {
 	Instance *targetInst = table_get(modTable, argv[0]);
 	IS_NULL(targetInst, *currMod = CALL_MODULE_ERR; *errVal = NONE_ERR; return true)
-	if(targetInst->mainExec(argc - 1, (argc > 1) ? argv + 1 : argv)) {
+	if(targetInst->mainExec(argc, argv)) {
 		char *lastOp = (targetInst->interface == NULL) ? get_last_op() : targetInst->interface->mod_get_ver();
-		*currMod = (lastOp == NULL) ? "tool" : lastOp;
+		*currMod = (lastOp == NULL) ? argv[0] : lastOp;
 
 		char *diagnostic = targetInst->diagnostic();
 		*errVal = (diagnostic == NULL) ? UNLISTED_ERR : diagnostic;
@@ -77,12 +78,20 @@ bool index_call_module(int argc, char **argv, char **currMod, char **errVal) {
 	return false;
 }
 
+char *index_get_helper(char *modName, char **errVal) {
+	Instance *targetInst = table_get(modTable, modName);
+	IS_NULL(targetInst, *errVal = NONE_ERR; return NULL)
+	IS_NULL(targetInst->helpData, *errVal = HELP_ERR; return NULL)
+	char *helpData = targetInst->helpData();
+	return (helpData == NULL) ? *errVal = HELP_NONE, NULL : helpData;
+}
+
 bool index_remove_module(const char *modName, ModuleInterface **retInterface) {
 	return table_delete(modTable, modName, retInterface);
 }
 
 bool index_store_mod(ModuleInterface *newMod, const char *modName, char **errVal) {
-	return table_insert(modTable, modName, newMod, newMod->mod_exec, newMod->mod_get_err, errVal);
+	return table_insert(modTable, modName, newMod, newMod->mod_exec, newMod->mod_get_err, newMod->mod_get_help, errVal);
 }
 
 void index_cleanup(void) {

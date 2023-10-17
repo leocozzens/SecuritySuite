@@ -26,7 +26,7 @@ typedef struct {
     void (*mod_set_output)  (_FILE *newStream);
 } ModuleInterface;
 
-ModuleInterface *load_module(const char *modPath, char **errVal);
+ModuleInterface *load_module(const char *restrict modPath, char **errVal);
 void unload_module(ModuleInterface *targetMod);
 
 #endif

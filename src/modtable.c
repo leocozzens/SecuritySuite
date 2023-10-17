@@ -59,7 +59,7 @@ bool table_init(uint64_t tableSize, HashTable **table) {
     return false;
 }
 
-bool table_insert(HashTable *table, const char *key, ModuleInterface *interface, exec mainExec, get_err diagnostic, char **errVal) {
+bool table_insert(HashTable *table, const char *key, ModuleInterface *interface, exec mainExec, get_err diagnostic, get_help helpData, char **errVal) {
     if(table == NULL || key == NULL || mainExec == NULL || diagnostic == NULL) {
         *errVal = NULL_ERR;
         return true;
@@ -99,6 +99,7 @@ bool table_insert(HashTable *table, const char *key, ModuleInterface *interface,
     activeInst->interface = interface;    
     activeInst->mainExec = mainExec;
     activeInst->diagnostic = diagnostic;
+    activeInst->helpData = helpData;
     return false;
 }
 

@@ -14,6 +14,8 @@
 #define OBJ_ERR             "Object not found"
 #define UNLISTED_ERR        "Unlisted error / Error not provided by tool"
 #define CALL_MODULE_ERR     "Failure to call module"
+#define HELP_ERR            "No help function associated with module"
+#define HELP_NONE           "Module helper failed to produce valid data"
 
 #define LIB_ERR             "Failed to load module - "
 #define FUNC_NOT_FOUND      "Failed to load module symbol - "

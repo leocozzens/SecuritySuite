@@ -1,8 +1,11 @@
 // C stdlib headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 // Local headers
 #include <loader.h>
+#include <errors.h>
+#include <operations.h>
 #include <index.h>
 #include <input.h>
 
@@ -17,8 +20,11 @@
 #define INIT_ERR			"ERROR: Program initialization failed\n%s\n"
 #define INPUT_ERR			"ERROR: Failed to receive user input\n%s\n"
 #define MODULE_ERR			"ERROR: %s - %s\n"
+#define HELP_INFO			"Type %s %s for more information\n\n"
 
 #define IS_NULL(_x, _y)     if((_x) == NULL) { _y; }
+#define STRINGIZE(_arg)		#_arg
+#define EXP_STRINGIZE(_arg)	STRINGIZE(_arg)
 
 static char *errVal;
 static char *currMod;
@@ -43,8 +49,10 @@ int main(int argc, char **argv) {
 		readBuff = input_get(stdin, &errVal);
 		IS_NULL(readBuff, fprintf(stderr, INPUT_ERR, errVal); continue)
 		localArgv = input_arglist(readBuff, &localArgc);
-		if(index_call_module(localArgc, localArgv, &currMod, &errVal))
+		if(index_call_module(localArgc, localArgv, &currMod, &errVal)) {
 			fprintf(stderr, MODULE_ERR, currMod, errVal);
+			if(strcmp(currMod, CALL_MODULE_ERR) != 0) fprintf(stderr, HELP_INFO, EXP_STRINGIZE(HELP), currMod);
+		}
 		free(localArgv);
 	}
 	index_cleanup();
