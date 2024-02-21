@@ -26,7 +26,7 @@ all: create_dirs
 all: $(BIN)
 all: $(SHARED_LIBS)
 
-release: CFLAGS = -O2
+release: CFLAGS = -O2 -DNDEBUG
 release: new
 
 $(SHARED_LIB)/%: $(SHARED_LIB)/%/main.c

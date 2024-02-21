@@ -39,7 +39,7 @@ ModuleInterface *load_module(const char *restrict modPath, char **errVal) {
 	if(newMod->objectHandle == NULL) {
 		DWORD errorCode = GetLastError();
 		static char errorMessage[ERR_SIZE];
-		
+
 		DWORD formatResult = FormatMessageA(
 			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL,
